@@ -1,6 +1,7 @@
 import abc
 import os
 import glob
+import inspect
 import random
 import torch
 
@@ -9,6 +10,19 @@ from libero.libero import get_libero_path
 from libero.libero.benchmark.libero_suite_task_map import libero_task_map
 
 BENCHMARK_MAPPING = {}
+
+
+def load_init_states(init_states_path):
+    """Load a task's initial simulator states.
+
+    The ``*.pruned_init`` files ship with this package and contain pickled numpy
+    arrays, so they cannot be read with ``weights_only=True`` (the default of
+    ``torch.load`` since torch 2.6). They are trusted package data, so we pass
+    ``weights_only=False`` on torch versions that accept the argument.
+    """
+    if "weights_only" in inspect.signature(torch.load).parameters:
+        return torch.load(init_states_path, weights_only=False)
+    return torch.load(init_states_path)
 
 
 def register_benchmark(target_class):
@@ -161,7 +175,7 @@ class Benchmark(abc.ABC):
             self.tasks[i].problem_folder,
             self.tasks[i].init_states_file,
         )
-        init_states = torch.load(init_states_path)
+        init_states = load_init_states(init_states_path)
         return init_states
 
     def set_task_embs(self, task_embs):

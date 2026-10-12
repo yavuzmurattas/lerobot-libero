@@ -1,4 +1,5 @@
 import os
+import sys
 import yaml
 
 # This is a default path for localizing all the benchmark related files
@@ -59,16 +60,37 @@ def set_libero_default_path(custom_location=os.path.dirname(os.path.abspath(__fi
         yaml.dump(new_config, f)
 
 
-if not os.path.exists(libero_config_path):
-    os.makedirs(libero_config_path)
+def _can_prompt():
+    """Return True if it is safe to ask the user questions on stdin.
+
+    Prompting is skipped when stdin is not a TTY (CI, containers, piped or
+    closed stdin) or when the ``LIBERO_NONINTERACTIVE`` environment variable
+    is set to a truthy value. In that case the default paths are used.
+    """
+    if os.environ.get("LIBERO_NONINTERACTIVE", "").strip().lower() in ("1", "true", "yes"):
+        return False
+    try:
+        return sys.stdin is not None and sys.stdin.isatty()
+    except (AttributeError, ValueError):
+        return False
+
+
+os.makedirs(libero_config_path, exist_ok=True)
 
 if not os.path.exists(config_file):
     # Create a default config file
 
     default_path_dict = get_default_path_dict()
-    answer = input(
-        "Do you want to specify a custom path for the dataset folder? (Y/N): "
-    ).lower()
+    if _can_prompt():
+        answer = input(
+            "Do you want to specify a custom path for the dataset folder? (Y/N): "
+        ).lower()
+    else:
+        print(
+            "[info] Non-interactive session detected (stdin is not a TTY or "
+            "LIBERO_NONINTERACTIVE is set); using default paths for the LIBERO config."
+        )
+        answer = "n"
     if answer == "y":
         # If the user wants to specify a custom storage path, prompt them to enter it
         custom_dataset_path = input(

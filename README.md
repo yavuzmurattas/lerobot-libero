@@ -64,6 +64,11 @@ Then install the `libero` package:
 pip install -e .
 ```
 
+On first import, `libero` creates a config file at `~/.libero/config.yaml` (override the
+directory with `LIBERO_CONFIG_PATH`). In an interactive terminal it asks whether to use a
+custom dataset folder. When stdin is not a TTY (CI, containers, piped input) or
+`LIBERO_NONINTERACTIVE=1` is set, it writes the default paths without prompting.
+
 # Datasets
 We provide high-quality human teleoperation demonstrations for the four task suites in **LIBERO**. To download the demonstration dataset, run:
 ```python

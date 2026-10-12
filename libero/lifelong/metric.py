@@ -10,6 +10,7 @@ import torch.multiprocessing as mp
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
+from libero.libero.benchmark import load_init_states
 from libero.libero.envs import OffScreenRenderEnv, SubprocVectorEnv, DummyVectorEnv
 from libero.libero.utils.time_utils import Timer
 from libero.libero.utils.video_utils import VideoWriter
@@ -104,7 +105,7 @@ def evaluate_one_task_success(
         init_states_path = os.path.join(
             cfg.init_states_folder, task.problem_folder, task.init_states_file
         )
-        init_states = torch.load(init_states_path)
+        init_states = load_init_states(init_states_path)
         num_success = 0
         for i in range(eval_loop_num):
             env.reset()

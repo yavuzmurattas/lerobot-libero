@@ -20,7 +20,7 @@ from transformers import AutoModel, pipeline, AutoTokenizer, logging
 from pathlib import Path
 
 from libero.libero import get_libero_path
-from libero.libero.benchmark import get_benchmark
+from libero.libero.benchmark import get_benchmark, load_init_states
 from libero.libero.envs import OffScreenRenderEnv, SubprocVectorEnv
 from libero.libero.utils.time_utils import Timer
 from libero.libero.utils.video_utils import VideoWriter
@@ -251,7 +251,7 @@ def main():
         init_states_path = os.path.join(
             cfg.init_states_folder, task.problem_folder, task.init_states_file
         )
-        init_states = torch.load(init_states_path)
+        init_states = load_init_states(init_states_path)
         indices = np.arange(env_num) % init_states.shape[0]
         init_states_ = init_states[indices]
 
